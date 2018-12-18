@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>todolist</title>
+<style>
+li{padding:3px 0;}
+li i{padding-left:10px;font-style:normal;color:#999;cursor:pointer;display:none;}
+li span:hover + i{display: inline;}
+li input:checked + span{text-decoration:line-through;color:#999;}
+</style>
+</head>
+<body>
+<!-- 之前用vue弄了个todolist，感觉还不错，这次用js来练手。
+这个是真的感觉有锻炼效果，其实只要是难的东西，感觉都有锻炼效果。 vue也可以再重新弄，最好还是发到线上去，不要本地，因为可能换了浏览器？不对，本地也可以，因为是存储到本地的。-->
+<!-- 大概内容如下：
+每日todolist
+input 输入内容后添加一项新任务。
+点击复选框，变成已完成，同时内容被划线。
+输入自己每天要完成的内容。
+有一个清空的按钮，可以把所有打钩的内容变为未完成。
+底下可以弄一个完成率的数字。
+每一项为了防止错别字，可以删除，但是没有全删。 
+使用数组来存储 localStorage
+-->
+
+<!-- 工作日志：
+input 输入姓名，输入工作内容
+时间，可以选择格式（会存档）
+每项工作都有复选框，已完成会在末尾加上（已完成）。 -->
+
+<input type="text" id="input"><button type="button" id="btn">添加</button>
+<h3>每日计划表</h3>
+<ol id="list">
+    
+</ol>
+<span id="reset">重置</span>
+<script>
+    var STORAGE_KEY = 'todos-js';
+    var todoStorage = {
+      fetch () {
+        return window.JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]')
+      },
+      save (items) {
+        window.localStorage.setItem(STORAGE_KEY, window.JSON.stringify(items))
+      }
+    }    
+
+    var input = document.getElementById('input');
+    var btn = document.getElementById('btn');
+    var list = document.getElementById('list');
+    var li = list.getElementsByTagName('li');  
+    var reset = document.getElementById('reset');  
+    if(!todoStorage.fetch()){
+        var arr = [];
+    }else{
+        arr = todoStorage.fetch();
+        todolist();
+    }   
+
+    input.addEventListener('keydown', function(e){
+        if (e.keyCode==13){
+            addTodolist();
+        }
+    })
+    btn.addEventListener('click', function(){
+        addTodolist();
+    })
+    function todolist(){
+        var fragment  = document.createDocumentFragment();
+        for(var i = 0 ; i < arr.length ; i++ ){
+            var li = document.createElement('li');
+            liFn(li,arr[i].text,arr[i].checked);
+            fragment.appendChild(li);
+        }
+        list.appendChild(fragment);
+    }
+    function addTodolist(){
+        if(!input.value){
+            return false;
+        }
+        var li = document.createElement('li');
+        liFn(li,input.value,false);
+        list.appendChild(li);
+        arr.push({'text':input.value,checked:false});
+        todoStorage.save(arr);
+        input.value = '';        
+    }
+    function liFn(li,text,Checked){
+        var checkbox = document.createElement('input');
+        var span = document.createElement('span');
+        var oI = document.createElement('i');
+        checkbox.setAttribute('type','checkbox');
+        checkbox.checked = Checked;            
+        span.textContent = text;
+        oI.textContent = 'del';
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(oI);
+    }       
+    for(var i = 0 ; i < li.length ; i++ ){
+        (function(i){
+            // 点击复选框 选中  
+            var checkbox = li[i].getElementsByTagName('input')[0];
+            checkbox.addEventListener('change',function(){
+                arr[i].checked = this.checked;
+                todoStorage.save(arr);
+            })
+            // 点击 del 删除
+            var del = li[i].getElementsByTagName('i')[0];
+            del.addEventListener('click',function(){
+                this.parentNode.remove();
+                arr.splice(i,1);
+                todoStorage.save(arr);
+            })
+        })(i)
+    }    
+    // 把所有的选中清空
+    reset.addEventListener('click',function(){
+        for(var i = 0 ; i < arr.length; i++ ){
+            arr[i].checked = false;
+            li[i].getElementsByTagName('input')[0].checked = false;
+        }
+        todoStorage.save(arr);
+    })
+</script>
+</body>
+</html>
