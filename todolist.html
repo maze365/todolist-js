@@ -5,7 +5,7 @@
 <style>
 li{padding:3px 0;}
 li i{padding-left:10px;font-style:normal;color:#999;cursor:pointer;display:none;}
-li span:hover + i{display: inline;}
+li:hover i{display: inline;}
 li input:checked + span{text-decoration:line-through;color:#999;}
 </style>
 </head>
@@ -33,6 +33,7 @@ input 输入姓名，输入工作内容
 <ol id="list">
     
 </ol>
+<p><span id="number">0</span>% / 100%</p>
 <span id="reset">重置</span>
 <script>
     var STORAGE_KEY = 'todos-js';
@@ -50,6 +51,7 @@ input 输入姓名，输入工作内容
     var list = document.getElementById('list');
     var li = list.getElementsByTagName('li');  
     var reset = document.getElementById('reset');  
+    var oNum = document.getElementById('number');
     if(!todoStorage.fetch()){
         var arr = [];
     }else{
@@ -69,7 +71,7 @@ input 输入姓名，输入工作内容
         var fragment  = document.createDocumentFragment();
         for(var i = 0 ; i < arr.length ; i++ ){
             var li = document.createElement('li');
-            liFn(li,arr[i].text,arr[i].checked);
+            liFn(li,arr[i].txt,arr[i].check);
             fragment.appendChild(li);
         }
         list.appendChild(fragment);
@@ -81,17 +83,17 @@ input 输入姓名，输入工作内容
         var li = document.createElement('li');
         liFn(li,input.value,false);
         list.appendChild(li);
-        arr.push({'text':input.value,checked:false});
+        arr.push({'txt':input.value,check:false});
         todoStorage.save(arr);
         input.value = '';        
     }
-    function liFn(li,text,Checked){
+    function liFn(li,txt,check){
         var checkbox = document.createElement('input');
         var span = document.createElement('span');
         var oI = document.createElement('i');
         checkbox.setAttribute('type','checkbox');
-        checkbox.checked = Checked;            
-        span.textContent = text;
+        checkbox.checked = check;            
+        span.textContent = txt;
         oI.textContent = 'del';
         li.appendChild(checkbox);
         li.appendChild(span);
@@ -99,11 +101,12 @@ input 输入姓名，输入工作内容
     }       
     for(var i = 0 ; i < li.length ; i++ ){
         (function(i){
-            // 点击复选框 选中  
+            // 点击复选框 选中
             var checkbox = li[i].getElementsByTagName('input')[0];
             checkbox.addEventListener('change',function(){
-                arr[i].checked = this.checked;
+                arr[i].check = this.checked;
                 todoStorage.save(arr);
+                missionNum();
             })
             // 点击 del 删除
             var del = li[i].getElementsByTagName('i')[0];
@@ -117,11 +120,23 @@ input 输入姓名，输入工作内容
     // 把所有的选中清空
     reset.addEventListener('click',function(){
         for(var i = 0 ; i < arr.length; i++ ){
-            arr[i].checked = false;
+            arr[i].check = false;
             li[i].getElementsByTagName('input')[0].checked = false;
         }
         todoStorage.save(arr);
     })
+    // 计算完成了多少任务
+    function missionNum(){
+        var num = 0;
+        for(var n = 0 ; n < arr.length; n++ ){
+            if(arr[n].check){
+                num++;
+            }
+        }
+        oNum.textContent = (num/arr.length)*100;
+    }
+    missionNum();
+     
 </script>
 </body>
 </html>
