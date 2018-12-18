@@ -62,10 +62,12 @@ input 输入姓名，输入工作内容
     input.addEventListener('keydown', function(e){
         if (e.keyCode==13){
             addTodolist();
+            missionNum();
         }
     })
     btn.addEventListener('click', function(){
         addTodolist();
+        missionNum();
     })
     function todolist(){
         var fragment  = document.createDocumentFragment();
@@ -114,10 +116,11 @@ input 输入姓名，输入工作内容
                 this.parentNode.remove();
                 arr.splice(i,1);
                 todoStorage.save(arr);
+                missionNum();
             })
         })(i)
     }    
-    // 把所有的选中清空
+    // 把所有的选中清空 重置
     reset.addEventListener('click',function(){
         for(var i = 0 ; i < arr.length; i++ ){
             arr[i].check = false;
@@ -127,13 +130,17 @@ input 输入姓名，输入工作内容
     })
     // 计算完成了多少个任务
     function missionNum(){
+        if(arr.length===0){
+            return false;
+        }
+        console.log(arr.length);
         var num = 0;
         for(var n = 0 ; n < arr.length; n++ ){
             if(arr[n].check){
                 num++;
             }
         }
-        oNum.textContent = (num/arr.length)*100;
+        oNum.textContent = ((num/arr.length)*100).toFixed(2);
     }
     missionNum();
      
